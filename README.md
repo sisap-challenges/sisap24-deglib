@@ -1,12 +1,10 @@
 # SISAP 2024 Challenge: working example on Julia 
 
-This repository is a working example for the challenge <https://sisap-challenges.github.io/>, working with Julia and GitHub Actions, as specified in Task's descriptions.
+This repository is a working example for the challenge <https://sisap-challenges.github.io/>, working with Python and GitHub Actions, as specified in Task's descriptions.
 
 
 ## Steps for running
-It requires a working installation of Julia (verified with v1.8), which can be downloaded from <https://julialang.org/downloads/>, and an installation of the git tools. You will need internet access for cloning and downloading datasets.
-
-Clone the repository and check the <https://github.com/sisap-challenges/sisap24-example-julia/blob/main/.github/workflows/ci.yml> file for looking how to start
+It requires a working installation of python, and an installation of the git tools. You will need internet access for cloning and downloading datasets.
 
 the following commands should be run
 ```bash
