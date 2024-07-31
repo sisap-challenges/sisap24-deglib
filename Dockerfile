@@ -5,18 +5,15 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install software
 #RUN apt-get update && apt-get install -y --no-install-recommends build-essential curl ca-certificates
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
-RUN curl -O https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-1.10.2-linux-x86_64.tar.gz 
-RUN tar xvfz julia-1.10.2-linux-x86_64.tar.gz
-RUN rm -f julia-1.10.2-linux-x86_64.tar.gz
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates software-properties-common
+RUN add-apt-repository ppa:deadsnakes/ppa -y && apt-get update && apt install python3.12 -y
+RUN python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple deglib==0.1.40
 
 # Copy files and directory structure to working directory
 COPY . . 
 #COPY bashrc ~/.bashrc
 
 SHELL ["/bin/bash", "--login", "-c"]
-ENV PATH=/julia-1.10.2/bin:${PATH}
-RUN JULIA_PROJECT=. julia -e 'using Pkg; Pkg.instantiate()'
 
 # Run commands specified in "run.sh" to get started
 
