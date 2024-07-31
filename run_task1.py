@@ -27,6 +27,7 @@ def parse_args():
         'dbsize', type=str, choices=["100K", "300K", "10M", "30M", "100M"], help='The database size to use'
     )
     parser.add_argument('-k', type=int, default=30, help='Number of results per query')
+    parser.add_argument('--show-progress', action='store_true', help='show progress during graph building')
 
     return parser.parse_args()
 
@@ -48,16 +49,19 @@ def main():
     print('data: "{}"\nqueries: "{}"'.format(data_file, query_file))
 
     # build graph
+    callback = 'progress' if args.show_progress else None
     with h5py.File(data_file, 'r') as data_f:
         assert 'emb' in data_f.keys()
         data = data_f['emb']
         build_start_time = time.perf_counter()
-        graph = build_deglib_from_data(data, **BUILD_HPARAMS, callback='progress')  # TODO: remove callback
+        graph = build_deglib_from_data(data, **BUILD_HPARAMS, callback=callback)
         build_end_time = time.perf_counter()
         build_duration = build_end_time - build_start_time
 
     # benchmark graph
+    print('loading queries:')
     queries = load_queries(query_file)
+    print('benchmarking graph:')
     benchmark_graph(graph, queries, k, dbsize, build_duration)
 
 
