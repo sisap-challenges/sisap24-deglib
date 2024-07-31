@@ -4,13 +4,13 @@ import argparse
 import gc
 import time
 from datetime import datetime
-from typing import Optional, Callable, Any, Iterable, Tuple
-
-import deglib
+from typing import Optional, Callable, Any
 from pathlib import Path
 
 import h5py
 import numpy as np
+
+import deglib
 
 
 BUILD_HPARAMS = {
