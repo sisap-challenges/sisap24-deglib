@@ -35,21 +35,13 @@ jobs:
           python-version: "3.12"
 
       - name: Install deglib
-        run: python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple deglib==0.1.40
+        run: |
+          python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple deglib==0.1.40
+          python3 -m pip install h5py
 
       - name: Install dependencies
         run: |
           sudo apt-get install curl libcurl4-openssl-dev
-    # - uses: actions/cache@v4
-    #   env:
-    #     cache-name: cache-artifacts
-    #   with:
-    #     path: ~/.julia/artifacts
-    #     key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-test-${{ env.cache-name }}-
-    #       ${{ runner.os }}-test-
-    #       ${{ runner.os }}-
       - name: Cache database and queries
         id: cache-data2024
         uses: actions/cache@v4
@@ -77,9 +69,3 @@ jobs:
           ls -l data2024
           python3 run_task1.py $DBSIZE
           python3 calc_recall.py data2024/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 result/$DBSIZE/deglib_eps0.01.h5
-#       - uses: actions/upload-artifact@v4
-#         with:
-#           name: Results
-#           path: |
-#             results-task*.csv
-#             results-summary.txt
