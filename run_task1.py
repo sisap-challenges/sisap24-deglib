@@ -107,7 +107,8 @@ def build_deglib_from_data(
     del builder
     gc.collect()
 
-    # TODO: convert to read-only-graph
+    graph = deglib.graph.ReadOnlyGraph.from_graph(graph)
+    gc.collect()
 
     return graph
 
