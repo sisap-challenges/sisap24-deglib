@@ -39,9 +39,9 @@ def main():
     k: int = args.k
 
     # create outdir (results-task1/$DBSIZE/$DATE)
-    date_str = datetime.now().strftime('yyyymmdd-HHMMSS')
-    outdir = Path('results-task1') / dbsize / date_str
-    print('outdir: "{}"'.format(outdir))
+    # date_str = datetime.now().strftime('%Y%m%d-%H%M%S')
+    # outdir = Path('results-task1') / dbsize / date_str
+    # print('outdir: "{}"'.format(outdir))
 
     # load data (database, queries) using h5-file in batches (convert to f32)
     data_file = Path("data2024") / "laion2B-en-clip768v2-n={}.h5".format(dbsize)
