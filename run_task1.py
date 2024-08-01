@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+import os
+
+# set tensorflow cpu threads, before importing tensorflow
+os.environ["OMP_NUM_THREADS"] = "4"
+
 import argparse
 import gc
 import time
@@ -9,6 +14,9 @@ from pathlib import Path
 
 import h5py
 import numpy as np
+import tensorflow as tf
+
+from compress import CompressionNet
 
 import deglib
 
@@ -47,6 +55,9 @@ def main():
     data_file = Path("data2024") / "laion2B-en-clip768v2-n={}.h5".format(dbsize)
     query_file = Path("data2024") / "public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
     print('data: "{}"\nqueries: "{}"'.format(data_file, query_file))
+    
+    # load compression network
+    compNet = CompressionNet(target_dim=512)
 
     # build graph
     callback = 'progress' if args.show_progress else None
@@ -54,22 +65,24 @@ def main():
         assert 'emb' in data_f.keys()
         data = data_f['emb']
         build_start_time = time.perf_counter()
-        graph = build_deglib_from_data(data, **BUILD_HPARAMS, callback=callback)
+        graph = build_deglib_from_data(data, compNet, **BUILD_HPARAMS, callback=callback)
         build_end_time = time.perf_counter()
         build_duration = build_end_time - build_start_time
 
     # benchmark graph
     print('loading queries:')
     queries = load_queries(query_file)
+    
     print('benchmarking graph:')
-    benchmark_graph(graph, queries, k, dbsize, build_duration)
+    benchmark_graph(graph, queries, compNet, k, dbsize, build_duration)
 
 
-def benchmark_graph(graph: deglib.graph.SearchGraph, queries: np.ndarray, k: int, dbsize: str, build_time: float):
+def benchmark_graph(graph: deglib.graph.SearchGraph, queries: np.ndarray, compNet:CompressionNet, k: int, dbsize: str, build_time: float):
     eps_settings = [0.0, 0.001, 0.002, 0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.12, 0.15]
     for eps in eps_settings:
         start_time = time.perf_counter()
-        prediction, distances = graph.search(queries, k=k, eps=eps)
+        compressed_queries = compNet.compress(queries.astype(np.float32), quantize=False, batch_size=queries.shape[0])
+        prediction, distances = graph.search(compressed_queries, k=k, eps=eps)
         end_time = time.perf_counter()
         query_time = end_time - start_time
         print('Done searching in {} sec'.format(query_time))
@@ -82,7 +95,7 @@ def benchmark_graph(graph: deglib.graph.SearchGraph, queries: np.ndarray, k: int
 
 
 def build_deglib_from_data(
-        data: h5py.Dataset, edges_per_vertex: int = 32, metric: deglib.Metric = deglib.Metric.InnerProduct,
+        data: h5py.Dataset, compNet:CompressionNet, edges_per_vertex: int = 32, metric: deglib.Metric = deglib.Metric.InnerProduct,
         lid: deglib.builder.LID = deglib.builder.LID.Unknown, extend_k: Optional[int] = None, extend_eps: float = 0.2,
         callback: Callable[[Any], None] | str | None = None
 ):
@@ -98,7 +111,7 @@ def build_deglib_from_data(
         max_index = min(min_index + chunk_size, data.shape[0])
         builder.add_entry(
             labels[min_index:max_index],
-            data[min_index:max_index].astype(np.float32)
+            compNet.compress(data[min_index:max_index].astype(np.float32), quantize=False, batch_size=chunk_size)
         )
 
     builder.build(callback=callback)
