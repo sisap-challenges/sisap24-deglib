@@ -12,6 +12,12 @@ class CompressionNet:
             self.saved_model_dir = "network/compression_network_768_to_512_426335epochs_3Layer.pb"
             self.max_file = "network/compression_network_768_to_512_426335epochs_3Layer_max.npy"
             self.min_file = "network/compression_network_768_to_512_426335epochs_3Layer_min.npy"
+            self.output_tensor_name = "a3/BiasAdd:0"
+        else if(target_dim == 64):
+            self.saved_model_dir = "network/compression_network_768_to_64_461243epochs_3Layer.pb"
+            self.max_file = "network/compression_network_768_to_64_461243epochs_3Layer_max.npy"
+            self.min_file = "network/compression_network_768_to_64_461243epochs_3Layer_min.npy"
+            self.output_tensor_name = "a3/BiasAdd:0"
         else:
             raise Exception("No compression configuration found for target dimension", target_dim)
         
@@ -32,7 +38,7 @@ class CompressionNet:
             
             # extract the input and output tensor
             self.input_tensor = self.graph.get_tensor_by_name("cv_data:0")
-            self.output_tensor = self.graph.get_tensor_by_name("a3/BiasAdd:0")
+            self.output_tensor = self.graph.get_tensor_by_name(self.output_tensor_name)
             
     def compress(self, input_data, quantize=False, batch_size=8192):        
         start = time.time()
