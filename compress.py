@@ -41,14 +41,14 @@ class CompressionNet:
         with self.graph.as_default():
             it = 0
             for input_data_batch in self.batch_generator_(input_data, batch_size=batch_size):
-                transFV = self.session.run(self.output_tensor, feed_dict={self.input_tensor: input_data_batch})
+                transFV = self.session.run(self.output_tensor, feed_dict={self.input_tensor: input_data_batch.astype(np.float32)})
                 quant_output = self.quantize_to_uint8_(transFV)
                 if(quantize == False):
                     quant_output = quant_output.astype(np.float32)
                 output.extend(quant_output)
+                it+=1
                 if(it % 100 == 0):
                     print("Compressed {} features after {:.2f} secs".format(len(output), (time.time()-start)))
-                it+=1
         output = np.stack(output)
         
         print("Compressed {} features after {:.2f} secs".format(output.shape[0], (time.time()-start)))

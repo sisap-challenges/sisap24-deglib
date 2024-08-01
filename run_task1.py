@@ -111,7 +111,7 @@ def build_deglib_from_data(
         max_index = min(min_index + chunk_size, data.shape[0])
         builder.add_entry(
             labels[min_index:max_index],
-            compNet.compress(data[min_index:max_index].astype(np.float32), quantize=False, batch_size=chunk_size)
+            compNet.compress(data[min_index:max_index], quantize=False, batch_size=chunk_size)
         )
 
     builder.build(callback=callback)
