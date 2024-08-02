@@ -61,12 +61,16 @@ jobs:
             curl -O http://ingeotec.mx/~sadit/sisap2024-data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5  # this url will be updated soon
             curl -O http://ingeotec.mx/~sadit/sisap2024-data/gold-standard-dbsize=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n=10k.h5 # this url will be updated soon
 
-      - name: Run benchmark
+      - name: Run Task 1
         env:
           DBSIZE: 300K
         run: |
-          pwd
-          ls -l 
-          ls -l data2024
-          python3 run_task1.py $DBSIZE --compression 512
+          python3 run_task.py $DBSIZE --compression 512 --query-file "data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
+          ./calc_recall.py result/$DBSIZE/
+
+      - name: Run Task 3
+        env:
+          DBSIZE: 300K
+        run: |
+          python3 run_task.py $DBSIZE --compression 64 --query-file "data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
           ./calc_recall.py result/$DBSIZE/

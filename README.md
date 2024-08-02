@@ -16,7 +16,12 @@ curl -O https://sisap-23-challenge.s3.amazonaws.com/SISAP23-Challenge/laion2B-en
 curl -O http://ingeotec.mx/~sadit/sisap2024-data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5  # this url will be updated soon
 curl -O http://ingeotec.mx/~sadit/sisap2024-data/gold-standard-dbsize=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n=10k.h5 # this url will be updated soon
 cd ..
-python3 run_task1.py $DBSIZE
-python3 calc_recall.py data2024/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 result/$DBSIZE/deglib_eps0.01.h5
-```
 
+# for task 1
+python3 run_task.py $DBSIZE --compression 512 --query-file "data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
+python3 calc_recall.py data2024/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 result/$DBSIZE/
+
+# for task 3
+python3 run_task.py $DBSIZE --compression 64 --query-file "data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
+python3 calc_recall.py data2024/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 result/$DBSIZE/
+```

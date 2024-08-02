@@ -49,6 +49,10 @@ def parse_args():
     parser.add_argument(
         '--compression', '-c', type=int, default=0, help='use compression net to reduce data dimensionality'
     )
+    parser.add_argument(
+        '--query-file', type=Path, default=Path("data2024") / "public-queries-2024-laion2B-en-clip768v2-n=10k.h5",
+        help='The query file'
+    )
 
     return parser.parse_args()
 
