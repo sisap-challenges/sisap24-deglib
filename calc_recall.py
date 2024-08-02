@@ -19,10 +19,28 @@ def parse_args():
 def main():
     args = parse_args()
     gt_knns = load_h5(args.ground_truth)
-    pred_knns = load_h5(args.prediction)
+    prediction_path: Path = args.prediction
 
-    recall = calc_recall(gt_knns, pred_knns, args.k)
-    print('recall:', recall)
+    print(f'{"eps":<8} {"recall"}')
+    if prediction_path.is_file():
+        recall = calc_for_prediction(args.prediction, gt_knns, args.k)
+        eps = float(prediction_path.name[10:-3])
+        print(f'{eps:<8} {recall}')
+    elif prediction_path.is_dir():
+        eps_and_recalls = []
+        for file in prediction_path.iterdir():
+            if file.is_file() and file.suffix == '.h5':
+                eps = file.name[10:-3]
+                recall = calc_for_prediction(file, gt_knns, args.k)
+                eps_and_recalls.append((eps, recall))
+        eps_and_recalls.sort(key=lambda x: float(x[0]))
+        for eps, recall in eps_and_recalls:
+            print(f'{eps:<8} {recall:.4f}')
+
+
+def calc_for_prediction(prediction, gt_knns: np.ndarray, k: int):
+    pred_knns = load_h5(prediction)
+    return calc_recall(gt_knns, pred_knns, k)
 
 
 def load_h5(path: Path) -> np.ndarray:
