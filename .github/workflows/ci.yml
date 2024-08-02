@@ -37,8 +37,8 @@ jobs:
 
       - name: Install deglib
         run: |
-          python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple deglib==0.1.41
-          python3 -m pip install h5py
+          python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple deglib==0.1.44
+          python3 -m pip install h5py tensorflow
 
       - name: Install dependencies
         run: |
@@ -68,5 +68,5 @@ jobs:
           pwd
           ls -l 
           ls -l data2024
-          python3 run_task1.py $DBSIZE
+          python3 run_task1.py $DBSIZE --use-compression
           python3 calc_recall.py data2024/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 result/$DBSIZE/deglib_eps0.01.h5
