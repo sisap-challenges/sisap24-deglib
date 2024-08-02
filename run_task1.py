@@ -5,6 +5,7 @@ import os
 # set tensorflow cpu threads, before importing tensorflow
 os.environ["OMP_NUM_THREADS"] = "4"
 
+import multiprocessing
 import argparse
 import gc
 import time
@@ -99,7 +100,9 @@ def benchmark_graph(
         else:
             compressed_queries = queries
         start_time_benchmark = time.perf_counter()
-        prediction, distances = graph.search(compressed_queries, k=k, eps=eps, threads=6, thread_batch_size=32)
+        prediction, distances = graph.search(
+            compressed_queries, k=k, eps=eps, threads=multiprocessing.cpu_count(), thread_batch_size=32
+        )
         end_time = time.perf_counter()
         query_time = end_time - start_time
         print(f'{eps:<8} {query_time:<13.4f} {start_time_benchmark - start_time:<13.4f} '
