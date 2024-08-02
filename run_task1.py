@@ -9,7 +9,7 @@ import multiprocessing
 import argparse
 import gc
 import time
-from typing import Optional, Callable, Any
+from typing import Optional, Callable, Any, List
 from pathlib import Path
 
 import h5py
@@ -35,6 +35,8 @@ EPS_SETTINGS = [
     0.17, 0.18,  0.19,  0.2,   0.21,
     0.22, 0.25,  0.27,  0.3,   0.35,
 ]
+
+QUANTIZE = True
 
 
 def parse_args():
@@ -77,17 +79,28 @@ def main():
         build_end_time = time.perf_counter()
         build_duration = build_end_time - build_start_time
 
+    # load cluster centers
+    cluster_centers = np.load('cluster_centers.np', allow_pickle=True)
+    if comp_net is not None:
+        cluster_centers = comp_net.compress(cluster_centers, quantize=QUANTIZE, batch_size=cluster_centers.shape[0])
+    entry_indices, _ = graph.search(
+        cluster_centers, eps=0.2, k=1, threads=min(multiprocessing.cpu_count(), cluster_centers.shape[0]),
+        thread_batch_size=1
+    )
+    entry_indices = list(entry_indices.flatten())
+    print('entry_indices: {}'.format(entry_indices))
+
     # benchmark graph
     print('loading queries:')
     queries = load_queries(query_file)
     
     print('benchmarking graph:')
-    benchmark_graph(graph, queries, comp_net, k, dbsize, build_duration)
+    benchmark_graph(graph, queries, comp_net, k, dbsize, build_duration, entry_indices)
 
 
 def benchmark_graph(
         graph: deglib.graph.SearchGraph, queries: np.ndarray, comp_net: Optional[CompressionNet], k: int, dbsize: str,
-        build_time: float
+        build_time: float, entry_indices: List[int] | None
 ):
     print('queries:', queries.shape, queries.dtype)
     print(f'{"eps":<8} {"query time":<13} {"comp time":<13} {"graph time":<13}')
@@ -95,13 +108,14 @@ def benchmark_graph(
         start_time = time.perf_counter()
         if comp_net is not None:
             compressed_queries = comp_net.compress(
-                queries, quantize=True, batch_size=queries.shape[0]
+                queries, quantize=QUANTIZE, batch_size=queries.shape[0]
             )
         else:
             compressed_queries = queries
         start_time_benchmark = time.perf_counter()
         prediction, distances = graph.search(
-            compressed_queries, k=k, eps=eps, threads=multiprocessing.cpu_count(), thread_batch_size=32
+            compressed_queries, k=k, eps=eps, threads=multiprocessing.cpu_count(), thread_batch_size=32,
+            entry_vertex_indices=entry_indices
         )
         end_time = time.perf_counter()
         query_time = end_time - start_time
@@ -123,11 +137,10 @@ def build_deglib_from_data(
         callback: Callable[[Any], None] | str | None = None
 ):
     print('building graph with: {}'.format(BUILD_HPARAMS))
-    quantize = True
     num_samples = data.shape[0]
     if comp_net is not None:
         dim = comp_net.target_dim
-        metric = deglib.Metric.L2_Uint8 if quantize else deglib.Metric.L2
+        metric = deglib.Metric.L2_Uint8 if QUANTIZE else deglib.Metric.L2
     else:
         dim = data.shape[1]
         metric = deglib.Metric.InnerProduct
@@ -147,7 +160,7 @@ def build_deglib_from_data(
         if counter % 10 == 0:
             print('adding features {}'.format(min_index), flush=True)
         if comp_net is not None:
-            chunk = comp_net.compress(chunk, quantize=quantize, batch_size=chunk.shape[0])
+            chunk = comp_net.compress(chunk, quantize=QUANTIZE, batch_size=chunk.shape[0])
         else:
             chunk = chunk.astype(np.float32)
         builder.add_entry(
