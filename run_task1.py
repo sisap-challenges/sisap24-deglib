@@ -38,7 +38,7 @@ def parse_args():
     parser.add_argument('-k', type=int, default=30, help='Number of results per query')
     parser.add_argument('--show-progress', action='store_true', help='show progress during graph building')
     parser.add_argument(
-        '--use-compression', action='store_true', help='use compression net to reduce data dimensionality'
+        '--compression', '-c', type=int, default=0, help='use compression net to reduce data dimensionality'
     )
 
     return parser.parse_args()
@@ -79,8 +79,8 @@ def main():
     
     # load compression network
     comp_net = None
-    if args.use_compression:
-        comp_net = CompressionNet(target_dim=512)
+    if args.compression:
+        comp_net = CompressionNet(target_dim=args.compression)
 
     # build graph
     callback = 'progress' if args.show_progress else None
