@@ -9,8 +9,12 @@ import numpy as np
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Calculate recall for two h5 files')
-    parser.add_argument('ground_truth', type=Path, help='The ground truth h5 file')
     parser.add_argument('prediction', type=Path, help='The prediction h5 file')
+    parser.add_argument(
+        '--ground-truth', '-gt', type=Path,
+        default=Path('data2024/gold-standard-dbsize=300K--public-queries-2024-laion2B-en-clip768v2-n=10k.h5'),
+        help='The ground truth h5 file'
+    )
     parser.add_argument('-k', type=int, default=30, help='Number of results per query')
 
     return parser.parse_args()
