@@ -19,7 +19,7 @@ def parse_args():
 def main():
     args = parse_args()
     gt_knns = load_h5(args.ground_truth)
-    pred_knns = load_h5(args.prediction) + 1  # Offset by 1
+    pred_knns = load_h5(args.prediction)
 
     recall = calc_recall(gt_knns, pred_knns, args.k)
     print('recall:', recall)
@@ -46,4 +46,3 @@ def calc_recall(ground_truth: np.ndarray, prediction: np.ndarray, k: int):
 
 if __name__ == '__main__':
     main()
-
