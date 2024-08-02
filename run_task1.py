@@ -110,7 +110,7 @@ def benchmark_graph(
         start_time = time.perf_counter()
         if comp_net is not None:
             compressed_queries = comp_net.compress(
-                queries, quantize=False, batch_size=queries.shape[0]
+                queries, quantize=True, batch_size=queries.shape[0]
             )
         else:
             compressed_queries = queries
@@ -156,7 +156,7 @@ def build_deglib_from_data(
         chunk = data[min_index:max_index].astype(np.float32)
         print('adding chunk [{}:{}]'.format(min_index, max_index), flush=True)
         if comp_net is not None:
-            chunk = comp_net.compress(chunk, quantize=False, batch_size=max_index-min_index)
+            chunk = comp_net.compress(chunk, quantize=True, batch_size=chunk.shape[0])
         else:
             chunk = chunk.astype(np.float32)
         print('compressed chunk:', chunk.shape, chunk.dtype, flush=True)
@@ -172,6 +172,7 @@ def build_deglib_from_data(
     del builder
     gc.collect()
 
+    graph.remove_non_mrng_edges()
     graph = deglib.graph.ReadOnlyGraph.from_graph(graph)
     gc.collect()
 
