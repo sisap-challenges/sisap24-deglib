@@ -20,20 +20,19 @@ import deglib
 
 
 BUILD_HPARAMS = {
-    'edges_per_vertex': 24,
-    'metric': deglib.Metric.L2,
+    'edges_per_vertex': 32,
     'lid': deglib.builder.LID.Low,
     'extend_k': 64,
-    'extend_eps': 0.02,
+    'extend_eps': 0.1,
 }
 
 EPS_SETTINGS = [
-    0.001, 0.002, 0.005, 0.01, 0.02,
-    0.03,  0.04,  0.05, 0.06,  0.07,
-    0.08,  0.09,  0.1,  0.11,  0.12,
-    0.13,  0.14,  0.15, 0.16,  0.17,
-    0.18,  0.19,  0.2,  0.21,  0.22,
-    0.25,  0.27,  0.3,  0.32,  0.35
+    0.0,  0.001, 0.002, 0.005, 0.01,
+    0.02, 0.03,  0.04,  0.05,  0.06,
+    0.07, 0.08,  0.09,  0.1,   0.11,
+    0.12, 0.13,  0.14,  0.15,  0.16,
+    0.17, 0.18,  0.19,  0.2,   0.21,
+    0.22, 0.25,  0.27,  0.3,   0.35,
 ]
 
 
@@ -51,33 +50,11 @@ def parse_args():
     return parser.parse_args()
 
 
-# Ablauf:
-#  - Netzwerk laden
-#  - Bauen des Graphen
-#    - Daten laden
-#    - Daten komprimieren
-#    - Daten in den Builder adden
-#    - builder.build()  # Threading? (Heute von Nico)
-#  - remove_non_mrng_edges()
-#  - entry points calculaten
-#    - Kmeans centroids laden
-#    - entry_vertices berechnen mit Graph
-#  - benchmark
-#    - queries laden
-#    - queries komprimieren
-#    - hyperparameter search mdcc mit einbauen?
-
-
 def main():
     # parse DB_SIZE argument
     args = parse_args()
     dbsize: str = args.dbsize
     k: int = args.k
-
-    # create outdir (results-task1/$DBSIZE/$DATE)
-    # date_str = datetime.now().strftime('%Y%m%d-%H%M%S')
-    # outdir = Path('results-task1') / dbsize / date_str
-    # print('outdir: "{}"'.format(outdir))
 
     # load data (database, queries) using h5-file in batches (convert to f32)
     data_file = Path("data2024") / "laion2B-en-clip768v2-n={}.h5".format(dbsize)
@@ -138,16 +115,19 @@ def benchmark_graph(
 
 
 def build_deglib_from_data(
-        data: h5py.Dataset, comp_net: Optional[CompressionNet], edges_per_vertex: int, metric: deglib.Metric,
+        data: h5py.Dataset, comp_net: Optional[CompressionNet], edges_per_vertex: int,
         lid: deglib.builder.LID, extend_k: Optional[int] = None, extend_eps: float = 0.2,
         callback: Callable[[Any], None] | str | None = None
 ):
     print('building graph with: {}'.format(BUILD_HPARAMS))
+    quantize = True
     num_samples = data.shape[0]
     if comp_net is not None:
         dim = comp_net.target_dim
+        metric = deglib.Metric.L2_Uint8 if quantize else deglib.Metric.L2
     else:
         dim = data.shape[1]
+        metric = deglib.Metric.InnerProduct
     print('creating empty graph', flush=True)
     graph = deglib.graph.SizeBoundedGraph.create_empty(num_samples, dim, edges_per_vertex, metric)
     print('creating builder', flush=True)
@@ -156,17 +136,17 @@ def build_deglib_from_data(
     )
 
     labels = np.arange(num_samples, dtype=np.uint32)
-    chunk_size = 100_000
+    chunk_size = 50_000
     print('adding data to builder', flush=True)
-    for min_index in range(0, num_samples, chunk_size):
+    for counter, min_index in enumerate(range(0, num_samples, chunk_size)):
         max_index = min(min_index + chunk_size, num_samples)
         chunk = data[min_index:max_index].astype(np.float32)
-        print('adding chunk [{}:{}]'.format(min_index, max_index), flush=True)
+        if counter % 10 == 0:
+            print('adding features {}'.format(min_index), flush=True)
         if comp_net is not None:
-            chunk = comp_net.compress(chunk, quantize=True, batch_size=chunk.shape[0])
+            chunk = comp_net.compress(chunk, quantize=quantize, batch_size=chunk.shape[0])
         else:
             chunk = chunk.astype(np.float32)
-        print('compressed chunk:', chunk.shape, chunk.dtype, flush=True)
         builder.add_entry(
             labels[min_index:max_index],
             chunk
