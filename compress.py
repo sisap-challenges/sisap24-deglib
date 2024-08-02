@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
-import time
+import os
 import numpy as np
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 
 
@@ -42,11 +44,8 @@ class CompressionNet:
             self.output_tensor = self.graph.get_tensor_by_name(self.output_tensor_name)
             
     def compress(self, input_data, quantize=False, batch_size=8192):        
-        # start = time.time()
-        
         output = []
         with self.graph.as_default():
-            # it = 0
             for input_data_batch in self.batch_generator_(input_data, batch_size=batch_size):
                 trans_fv = self.session.run(
                     self.output_tensor, feed_dict={self.input_tensor: input_data_batch.astype(np.float32)}
@@ -55,12 +54,8 @@ class CompressionNet:
                 if not quantize:
                     quant_output = quant_output.astype(np.float32)
                 output.extend(quant_output)
-                # it += 1
-                # if it % 100 == 0:
-                # print("Compressed {} features after {:.2f} secs".format(len(output), (time.time()-start)))
         output = np.stack(output)
         
-        # print("Compressed {} features after {:.2f} secs".format(output.shape[0], (time.time()-start)))
         return output
 
     @staticmethod
