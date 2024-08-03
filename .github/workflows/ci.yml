@@ -66,17 +66,15 @@ jobs:
           DBSIZE: 300K
         run: |
           python3 run_task.py --dbsize $DBSIZE --compression 512 --query-file "data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
-          python3 calc_recall.py --dbsize $DBSIZE --ground-truth data/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 
 
       - name: Run Task 3
         env:
           DBSIZE: 300K
         run: |
           python3 run_task.py --dbsize $DBSIZE --compression 64 --query-file "data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
-          python3 calc_recall.py --dbsize $DBSIZE --ground-truth data/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: Evaluation Results
-          path: | 
-            results/res.csv
+        - name: Evaluation Results
+        env:
+          DBSIZE: 300K
+        run: |
+          python3 calc_recall.py --dbsize $DBSIZE --ground-truth data/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 
