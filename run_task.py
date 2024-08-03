@@ -163,7 +163,7 @@ def build_deglib_from_data(
     del builder
     gc.collect()
 
-    print('Start removing all none MRNG conform edges:', flush=True)
+    print('Removing all none MRNG conform edges ... ', flush=True)
     graph.remove_non_mrng_edges()
     graph = deglib.graph.ReadOnlyGraph.from_graph(graph)
     gc.collect()

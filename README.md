@@ -1,12 +1,26 @@
-# SISAP 2024 Challenge: working example on Julia 
+# SISAP 2024 Indexing Challenge
 
-This repository is a working example for the challenge <https://sisap-challenges.github.io/>, working with Python and GitHub Actions, as specified in Task's descriptions.
+This branch contains the code for our submission (Team "HTW") to the SISAP 2024 Indexing Challenge.
 
+**Members:**
 
-## Steps for running
-It requires a working installation of python, and an installation of the git tools. You will need internet access for cloning and downloading datasets.
+- Nico Hezel, HTW Berlin, Germany
+- Kai Barthel, HTW Berlin, Germany
+- Konstantin Schall, HTW Berlin, Germany
+- Klaus Jung, HTW Berlin, Germany
+- Bruno Schilling, HTW Berlin, Germany
 
-the following commands should be run
+## Setup
+It requires a working installation of python, and an installation of the git tools. You will need internet access for cloning and downloading datasets. 
+See also `.github/workflows/ci.yml` file for a running configuration. Note the different parameters for 300K and 100M datasets when running the experiments.
+
+### Install requires packages with pip 
+```bash
+python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple deglib==0.1.48
+python3 -m pip install h5py tensorflow
+```
+
+### Run Experiments
 ```bash
 export DBSIZE=300K
 
