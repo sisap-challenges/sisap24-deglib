@@ -44,33 +44,39 @@ jobs:
         run: |
           sudo apt-get install curl libcurl4-openssl-dev
       - name: Cache database and queries
-        id: cache-data2024
+        id: cache-data
         uses: actions/cache@v4
         with:
-            path: data2024/**.h5
-            key: data2024
+            path: data/**.h5
+            key: data
 
       - name: Download database and queries
-        if: steps.cache-data2024.outputs.cache-hit != 'true'
+        if: steps.cache-data.outputs.cache-hit != 'true'
         env:
           DBSIZE: 300K
         run: |
-            mkdir data2024
-            cd data2024
+            mkdir data
+            cd data
             curl -O https://sisap-23-challenge.s3.amazonaws.com/SISAP23-Challenge/laion2B-en-clip768v2-n=$DBSIZE.h5
-            curl -O http://ingeotec.mx/~sadit/sisap2024-data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5  # this url will be updated soon
-            curl -O http://ingeotec.mx/~sadit/sisap2024-data/gold-standard-dbsize=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n=10k.h5 # this url will be updated soon
+            curl -O http://ingeotec.mx/~sadit/sisap2024-data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5
+            curl -O http://ingeotec.mx/~sadit/sisap2024-data/gold-standard-dbsize=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n=10k.h5
 
       - name: Run Task 1
         env:
           DBSIZE: 300K
         run: |
-          python3 run_task.py $DBSIZE --compression 512 --query-file "data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
-          ./calc_recall.py result/$DBSIZE/
+          python3 run_task.py --dbsize $DBSIZE --compression 512 --query-file "data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
+          python3 calc_recall.py --dbsize DBSIZE --ground-truth data/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 
 
       - name: Run Task 3
         env:
           DBSIZE: 300K
         run: |
-          python3 run_task.py $DBSIZE --compression 64 --query-file "data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
-          ./calc_recall.py result/$DBSIZE/
+          python3 run_task.py --dbsize $DBSIZE --compression 64 --query-file "data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
+          python3 calc_recall.py --dbsize DBSIZE --ground-truth data/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Evaluation Results
+          path: | 
+            results/res.csv

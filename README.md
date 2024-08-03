@@ -10,18 +10,21 @@ the following commands should be run
 ```bash
 export DBSIZE=300K
 
-mkdir data2024
-cd data2024
+mkdir data
+cd data
 curl -O https://sisap-23-challenge.s3.amazonaws.com/SISAP23-Challenge/laion2B-en-clip768v2-n=$DBSIZE.h5
-curl -O http://ingeotec.mx/~sadit/sisap2024-data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5  # this url will be updated soon
-curl -O http://ingeotec.mx/~sadit/sisap2024-data/gold-standard-dbsize=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n=10k.h5 # this url will be updated soon
+curl -O http://ingeotec.mx/~sadit/sisap2024-data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5  
+curl -O http://ingeotec.mx/~sadit/sisap2024-data/gold-standard-dbsize=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n=10k.h5 
 cd ..
 
 # for task 1
-python3 run_task.py $DBSIZE --compression 512 --query-file "data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
-python3 calc_recall.py data2024/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 result/$DBSIZE/
+python run_task.py --dbsize $DBSIZE --compression 512 --query-file "data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
 
 # for task 3
-python3 run_task.py $DBSIZE --compression 64 --query-file "data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
-python3 calc_recall.py data2024/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 result/$DBSIZE/
+python run_task.py --dbsize $DBSIZE --compression 64 --query-file "data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
+
+# evaluate
+python calc_recall.py --dbsize DBSIZE --ground-truth data/gold-standard-dbsize\=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n\=10k.h5 
 ```
+
+The res.csv file is in the "results" directory.
