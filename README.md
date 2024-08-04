@@ -16,7 +16,7 @@ See also `.github/workflows/ci.yml` file for a running configuration. Note the d
 
 ### Install requires packages with pip 
 ```bash
-python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple deglib==0.1.49
+python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple deglib==0.1.51
 python3 -m pip install h5py tensorflow
 ```
 
