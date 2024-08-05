@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 
-import os
-
-# set tensorflow cpu threads, before importing tensorflow
-os.environ["OMP_NUM_THREADS"] = "4"
-
 import multiprocessing
 import argparse
 import gc

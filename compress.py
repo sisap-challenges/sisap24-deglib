@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
 import os
-import numpy as np
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import tensorflow as tf
 
+import numpy as np
+import tensorflow as tf
 
 class CompressionNet:
     def __init__(self, target_dim=512):
