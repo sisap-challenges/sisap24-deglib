@@ -37,7 +37,7 @@ jobs:
 
       - name: Install deglib
         run: |
-          git clone -b feat/python_bindings https://github.com/Visual-Computing/DynamicExplorationGraph.git
+          git clone -b SISAP https://github.com/Visual-Computing/DynamicExplorationGraph.git
           cd DynamicExplorationGraph/python
           pip install setuptools pybind11 build
           python setup.py copy_build_files 
