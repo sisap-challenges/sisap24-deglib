@@ -14,15 +14,10 @@ class CompressionNet:
             self.max_file = "network/compression_network_768_to_512_426335epochs_3Layer_max.npy"
             self.min_file = "network/compression_network_768_to_512_426335epochs_3Layer_min.npy"
             self.output_tensor_name = "a3/BiasAdd:0"
-        # elif target_dim == 64:
-        #     self.saved_model_dir = "network/compression_network_768_to_64_461243epochs_3Layer.pb"
-        #     self.max_file = "network/compression_network_768_to_64_461243epochs_3Layer_max.npy"
-        #     self.min_file = "network/compression_network_768_to_64_461243epochs_3Layer_min.npy"
-        #     self.output_tensor_name = "a3/BiasAdd:0"
         elif target_dim == 64:
-            self.saved_model_dir = "network/compression_network_768_to_64_224130epochs_3Layer1024.pb"
-            self.max_file = "network/compression_network_768_to_64_224130epochs_3Layer1024_max.npy"
-            self.min_file = "network/compression_network_768_to_64_224130epochs_3Layer1024_min.npy"
+            self.saved_model_dir = "network/compression_network_768_to_64_315856epochs_3Layer1024.pb"
+            self.max_file = "network/compression_network_768_to_64_315856epochs_3Layer1024_max.npy"
+            self.min_file = "network/compression_network_768_to_64_315856epochs_3Layer1024_min.npy"
             self.output_tensor_name = "a3/BiasAdd:0"
         else:
             raise Exception("No compression configuration found for target dimension", target_dim)
