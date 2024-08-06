@@ -15,6 +15,8 @@ from compress import CompressionNet
 import deglib
 
 
+SMART_ENTRY = False
+
 BUILD_HPARAMS = {
     'quantize': True,
     'edges_per_vertex': 32,
@@ -98,15 +100,17 @@ def main():
     print('\nStart benchmarking the graph:')
 
     # load cluster centers
-    cluster_centers = np.load('cluster_centers.npy', allow_pickle=True)
-    if comp_net is not None:
-        cluster_centers = comp_net.compress(cluster_centers, quantize=BUILD_HPARAMS['quantize'], batch_size=cluster_centers.shape[0])
-    entry_indices, _ = graph.search(
-        cluster_centers, eps=0.2, k=1, threads=min(multiprocessing.cpu_count(), cluster_centers.shape[0]),
-        thread_batch_size=1
-    )
-    entry_indices = list(entry_indices.flatten())
-    print('Seed vertex indices for the evaluation: {}'.format(entry_indices))
+    entry_indices = [0]
+    if SMART_ENTRY:
+        cluster_centers = np.load('cluster_centers.npy', allow_pickle=True)
+        if comp_net is not None:
+            cluster_centers = comp_net.compress(cluster_centers, quantize=BUILD_HPARAMS['quantize'], batch_size=cluster_centers.shape[0])
+        entry_indices, _ = graph.search(
+            cluster_centers, eps=0.2, k=1, threads=min(multiprocessing.cpu_count(), cluster_centers.shape[0]),
+            thread_batch_size=1
+        )
+        entry_indices = list(entry_indices.flatten())
+        print('Seed vertex indices for the evaluation: {}'.format(entry_indices))
 
     # evaluate on a test set
     queries = load_queries(query_file)
