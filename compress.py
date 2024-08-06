@@ -9,9 +9,9 @@ import tensorflow as tf
 class CompressionNet:
     def __init__(self, target_dim=512):
         if target_dim == 512:
-            self.saved_model_dir = "network/compression_network_768_to_512_426335epochs_3Layer.pb"
-            self.max_file = "network/compression_network_768_to_512_426335epochs_3Layer_max.npy"
-            self.min_file = "network/compression_network_768_to_512_426335epochs_3Layer_min.npy"
+            self.saved_model_dir = "network/compression_network_768_to_512_159906epochs_3Layer1024.pb"
+            self.max_file = "network/compression_network_768_to_512_159906epochs_3Layer1024_max.npy"
+            self.min_file = "network/compression_network_768_to_512_159906epochs_3Layer1024_min.npy"
             self.output_tensor_name = "a3/BiasAdd:0"
         elif target_dim == 64:
             self.saved_model_dir = "network/compression_network_768_to_64_315856epochs_3Layer1024.pb"
@@ -41,6 +41,13 @@ class CompressionNet:
             # extract the input and output tensor
             self.input_tensor = self.graph.get_tensor_by_name("cv_data:0")
             self.output_tensor = self.graph.get_tensor_by_name(self.output_tensor_name)
+
+        # dry run
+        sample_size = 10000
+        sample_data = np.zeros((sample_size, self.input_tensor.shape[1]), dtype=np.float32)
+        output = self.compress(sample_data, quantize=False, batch_size=sample_size)
+        print('Loaded and tested the compression network with shape {}'.format(sample_data.shape))
+
             
     def compress(self, input_data, quantize=False, batch_size=8192):        
         output = []
