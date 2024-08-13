@@ -1,0 +1,9 @@
+Note: Dockerfile was modified to install miniconda instead of the ubuntu 3.12 distribution since it gives many errors
+that are surely caused by several python instalations
+
+## Image construction 
+docker build -t sisap24/deglib .
+
+## Running
+mkdir result
+docker run -v /home/sisap23evaluation/data2024:/data:ro -v ./result:/result -it sisap24/deglib
