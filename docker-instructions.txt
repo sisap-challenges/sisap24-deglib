@@ -5,5 +5,10 @@ that are surely caused by several python instalations
 docker build -t sisap24/deglib .
 
 ## Running
-mkdir result
-docker run -v /home/sisap23evaluation/data2024:/data:ro -v ./result:/result -it sisap24/deglib
+mkdir results
+docker run --cpus=54 -v /home/sisap23evaluation/data2024:/data:ro -v ./results:/results -it sisap24/deglib 
+
+###On the container
+python run_task.py --dbsize 100M --compression 512 --query-file data/private-queries-2024-laion2B-en-clip768v2-n=10k.h5
+docker container update c75fdea459e2 --cpus=54 -m 64GB
+python run_task.py --dbsize 100M --compression 512 --query-file data/private-queries-2024-laion2B-en-clip768v2-n=10k.h5
